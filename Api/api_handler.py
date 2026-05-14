@@ -27,7 +27,7 @@ class KisApi:
 
         # 토큰 자동 발급
         self.token = self.get_access_token()
-        self.db_path = 'trading_system.db'
+        self.db_path = '../trading_system.db'
 
     # --- [인증 및 토큰] ---
     def get_access_token(self):
@@ -206,6 +206,9 @@ class KisApi:
 
         conn.close()
         print("🏁 전체 데이터 구축 완료.")
+
+    def get_market_news(self):
+        get_naver_news()
 
 # ---------------------------------------------------------------------------------------
 # 네이버 API
