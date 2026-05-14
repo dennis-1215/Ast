@@ -1,0 +1,5 @@
+AppKeys.py
+*.db
+*.sqbpro
+.idea/
+__pycache__/
