@@ -29,6 +29,10 @@ class AssetService:
 
     def get_balance_data(self):
         balance = self.api.get_balance()
+
+        if balance is None:
+            return None
+
         stock = []
         if balance:
             for item in balance:

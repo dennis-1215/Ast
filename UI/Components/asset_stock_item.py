@@ -40,6 +40,7 @@ class AssetStockItem(BaseStockItem):
             font-size: {FONT_MD}px;
             font-weight: 600;
             color: {TEXT_MAIN};
+            background-color: transparent;
             """
         )
 
@@ -48,6 +49,7 @@ class AssetStockItem(BaseStockItem):
             f"""
             font-size: {FONT_XS}px;
             color: {TEXT_SUB};
+            background-color: transparent;
             """
         )
 
@@ -69,6 +71,7 @@ class AssetStockItem(BaseStockItem):
             font-size: {FONT_SM}px;
             font-weight: bold;
             color: {TEXT_MAIN};
+            background-color: transparent;
             """
         )
 
@@ -84,6 +87,7 @@ class AssetStockItem(BaseStockItem):
             font-size: {FONT_XS}px;
             font-weight: bold;
             color: {color};
+            background-color: transparent;
             """
         )
 

@@ -53,6 +53,8 @@ class HomePage(QWidget):
 
         self.create_main_body()
 
+        self.asset_section.controller.balance_loaded.connect(self.on_balance_loaded)
+
         self.dock_bar = DockBar()
         self.dock_bar.menu_clicked.connect(self.on_menu_changed)
         self.main_layout.addWidget(self.dock_bar)
@@ -157,3 +159,18 @@ class HomePage(QWidget):
     # dock_bar에서 사용될 함수
     def on_menu_changed(self, menu):
         print(f"{menu} 메뉴 클릭")
+
+    # 자산 및 보유주식 호출 상태 처리
+    def on_balance_loaded(self, success):
+        if success:
+            print("자산 로딩 성공")
+        else:
+            print("자산 로딩 실패")
+
+            # 2초 뒤 재시도
+            self.timer_manager.create_timer(
+                name="retry_asset_load",
+                interval=2000,
+                callback=self.refresh_asset_data,
+                single_shot=True
+            )

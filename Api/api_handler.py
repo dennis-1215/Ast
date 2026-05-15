@@ -119,11 +119,27 @@ class KisApi:
             "CTX_AREA_FK100": "",
             "CTX_AREA_NK100": ""
         }
-        res = requests.get(f"{self.base_url}{path}", headers=headers, params=params)
 
+        try:
+            res = requests.get(f"{self.base_url}{path}", headers=headers, params=params)
 
+            if res.status_code != 200:
+                print("잔고 조회 실패: ", res.status_code)
+                return None
 
-        return res.json().get('output1', [])
+            data = res.json()
+
+            # print(json.dumps(data, indent=2, ensure_ascii=False))
+
+            if data.get("rt_cd") != "0":
+                print("API 오류:", data)
+                return None
+
+            return data.get("output1", [])
+
+        except Exception as e:
+            print("api_handler.py >>> get_balace() 예외:", e)
+            return None
 
     def get_asset_status(self):
         """총 평가액, 예수금 등 계좌 자산 현황 조회"""

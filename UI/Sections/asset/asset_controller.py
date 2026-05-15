@@ -1,17 +1,56 @@
-#
+from PySide6.QtCore import QObject, Signal
 
-class AssetController:
+class AssetController(QObject):
+
+    balance_loaded = Signal(bool)
 
     def __init__(self, service, view):
+        super().__init__()
+
         self.service = service
         self.view = view
 
-    def refresh(self):
-        data = self.service.get_asset_data()
-        stocks = self.service.get_balance_data()
+        self.is_balance_loaded = False
+        self.is_loading = False
 
-        self.update_summary(data)
-        self.update_stocks(stocks)
+    def refresh(self):
+        if self.is_loading:
+            return
+
+        self.is_loading = True
+
+        try:
+            data = self.service.get_asset_data()
+            stocks = self.service.get_balance_data()
+
+            print("AssetController : stocks = ", stocks)
+
+            # 실패 허용
+            if stocks is None:
+                print("[AssetController] 잔고 조회 실패")
+
+                self.is_balance_loaded = False
+                self.balance_loaded.emit(False)
+
+                return
+
+
+            # 성공
+            self.update_summary(data)
+            self.update_stocks(stocks)
+
+            self.is_balance_loaded = True
+            self.balance_loaded.emit(True)
+
+        except Exception as e:
+
+            print(f"[AssetController] refresh 실패: {e}")
+
+            self.is_balance_loaded = False
+            self.balance_loaded.emit(False)
+
+        finally:
+            self.is_loading = False
 
     def update_summary(self, data):
 

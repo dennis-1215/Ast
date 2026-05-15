@@ -7,7 +7,7 @@ class TimerManager:
         self.timers = {}
 
     # 타이머 생성
-    def create_timer(self, name, interval, callback, auto_start=True):
+    def create_timer(self, name, interval, callback, auto_start=True, single_shot=False):
 
         # 이미 존재하면 제거
         if name in self.timers:
@@ -16,6 +16,7 @@ class TimerManager:
         timer = QTimer(self.parent)
         timer.timeout.connect(callback)
         timer.setInterval(interval)
+        timer.setSingleShot(single_shot)
 
         self.timers[name] = timer
 

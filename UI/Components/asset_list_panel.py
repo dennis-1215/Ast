@@ -22,8 +22,8 @@ class AssetListPanel(QWidget):
         self.list_frame = QFrame()
         self.list_frame.setStyleSheet(
             f"""
-            background-color: {HOVER};
-            border-radius: {RADIUS_ITEM}px;
+            background-color: {BORDER};
+            border-radius: {RADIUS_CARD}px;
             """
         )
 
@@ -33,7 +33,28 @@ class AssetListPanel(QWidget):
         # 스크롤 영역
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setFrameShape(QFrame.NoFrame)
+        #self.scroll_area.setFrameShape(QFrame.NoFrame)
+        self.scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+                border-radius: 12px;
+            }
+        
+            QScrollBar:vertical {
+                width: 10px;
+                background: transparent;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #c1c1c1;
+                border-radius: 5px;
+            }
+            QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical {
+                height: 0px;
+            }
+            """
+        )
 
         # 스크롤 내부 위젯
         self.scroll_widget = QWidget()
