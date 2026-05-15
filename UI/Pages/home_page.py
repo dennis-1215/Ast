@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QHBoxLayout)
+from PySide6.QtCore import QTimer
 
 from Api import api_handler
 
@@ -10,8 +11,6 @@ from Core.services.news_service import NewsService
 # Utils
 from UI.Utils.timers import TimerManager
 from UI.Utils.time_utils import *
-
-# Style
 
 # Components
 from UI.Components.base_card import BaseCard
@@ -40,6 +39,9 @@ class HomePage(QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
 
+        # 창을 먼저 띄우고 데이터 추가
+        QTimer.singleShot(0, self.refresh_asset_data)
+
         # 메인화면 레이아웃
         self.top_bar = TopBar(self.news_service.get_news_data())
         self.main_layout.addWidget(self.top_bar)
@@ -59,8 +61,7 @@ class HomePage(QWidget):
         self.dock_bar.menu_clicked.connect(self.on_menu_changed)
         self.main_layout.addWidget(self.dock_bar)
 
-        # 자산 현황 업데이트
-        self.refresh_asset_data()
+
 
         # 시간 표시용 타이머 객체 생성
         self.timer_manager.create_timer(
@@ -72,6 +73,8 @@ class HomePage(QWidget):
         self.clock = TimeUtils()
         # 초기 시간 즉시 표시
         self.update_clock_ui()
+
+
 
 
     def update_clock_ui(self):
