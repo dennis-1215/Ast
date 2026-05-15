@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import QApplication
-from mainPage import *
+from UI.trading_app import TradingApp
 
 app = QApplication(sys.argv)
 

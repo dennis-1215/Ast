@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 import sqlite3
@@ -18,6 +19,7 @@ class KisApi:
         self.acc_no = AppKeys.paper_account if is_paper_trading else AppKeys.real_account
         self.acc_no_prefix = "01"
         self.is_paper = is_paper_trading
+        self.token_file = "token_paper.txt" if self.is_paper else "token_real.txt"
 
         # URL 설정
         if self.is_paper:
@@ -25,9 +27,56 @@ class KisApi:
         else:
             self.base_url = "https://openapi.koreainvestment.com:9443"
 
-        # 토큰 자동 발급
-        self.token = self.get_access_token()
+        # 토큰 로드
+        self.token = self.load_token()
+
+        if not self.token or not self.check_token_valid():
+            self.token = self.get_access_token()
+            self.save_token()
+
         self.db_path = '../trading_system.db'
+
+    def load_token(self):
+        if os.path.exists(self.token_file):
+            with open(self.token_file, "r") as f:
+                return f.read().strip()
+
+        return ""
+
+    def save_token(self):
+        with open(self.token_file, "w") as f:
+            f.write(self.token)
+        print(f"💾 새 토큰이 {self.token_file}에 저장되었습니다.")
+
+    def check_token_valid(self):
+        if not self.token:
+            return False
+
+        # 잔고 조회 등 가벼운 API 하나를 호출해서 토큰 유효성 테스트
+        path = "/uapi/domestic-stock/v1/trading/inquire-balance"
+        headers = {
+            "Content-Type": "application/json",
+            "authorization": f"Bearer {self.token}",
+            "appkey": self.app_key,
+            "appsecret": self.app_secret,
+            "tr_id": "VTTC8434R" if self.is_paper else "TTTC8434R"
+        }
+        params = {
+            "CANO": self.acc_no, "ACNT_PRDT_CD": self.acc_no_prefix,
+            "AFHR_FLPR_YN": "N", "OFL_YN": "", "INQR_DVSN": "02",
+            "UNPR_DVSN": "01", "FUND_STTL_ICLD_YN": "N",
+            "FNCG_AMT_AUTO_RDPT_YN": "N", "PRCS_DVSN": "00",
+            "CTX_AREA_FK100": "", "CTX_AREA_NK100": ""
+        }
+        res = requests.get(f"{self.base_url}{path}", headers=headers, params=params)
+
+        # 401 에러(인증오류)가 나면 토큰 만료로 판단
+        if res.status_code == 200:
+            print("✅ 기존 토큰 유효 확인")
+            return True
+        else:
+            print("⚠️ 기존 토큰 만료 또는 유효하지 않음")
+            return False
 
     # --- [인증 및 토큰] ---
     def get_access_token(self):
@@ -71,6 +120,9 @@ class KisApi:
             "CTX_AREA_NK100": ""
         }
         res = requests.get(f"{self.base_url}{path}", headers=headers, params=params)
+
+
+
         return res.json().get('output1', [])
 
     def get_asset_status(self):
@@ -207,42 +259,35 @@ class KisApi:
         conn.close()
         print("🏁 전체 데이터 구축 완료.")
 
-    def get_market_news(self):
-        get_naver_news()
+    def get_market_news(self, query="주식", display=10):
+        """
+            네이버 뉴스 API를 통해 뉴스 제목과 URL을 가져옵니다.
+            """
+        client_id = AppKeys.Naver_ID
+        client_secret = AppKeys.Naver_Secret
 
-# ---------------------------------------------------------------------------------------
-# 네이버 API
-# ---------------------------------------------------------------------------------------
+        url = f"https://openapi.naver.com/v1/search/news.json?query={query}&display={display}&sort=sim"
+        headers = {
+            "X-Naver-Client-Id": client_id,
+            "X-Naver-Client-Secret": client_secret
+        }
 
-def get_naver_news(query="주식", display=10):
-    """
-    네이버 뉴스 API를 통해 뉴스 제목과 URL을 가져옵니다.
-    """
-    client_id = AppKeys.Naver_ID
-    client_secret = AppKeys.Naver_Secret
-
-    url = f"https://openapi.naver.com/v1/search/news.json?query={query}&display={display}&sort=sim"
-    headers = {
-        "X-Naver-Client-Id": client_id,
-        "X-Naver-Client-Secret": client_secret
-    }
-
-    try:
-        res = requests.get(url, headers=headers)
-        if res.status_code == 200:
-            items = res.json().get('items', [])
-            formatted_news = []
-            for item in items:
-                # <b> 태그 제거 및 데이터 정제
-                title = item['title'].replace("<b>", "").replace("</b>", "").replace("&quot;", "\"")
-                formatted_news.append({
-                    "title": f"📢 {title}",
-                    "url": item['link']  # 기사 URL 제공됨
-                })
-            return formatted_news
-    except Exception as e:
-        print(f"네이버 뉴스 로드 중 오류: {e}")
-    return []
+        try:
+            res = requests.get(url, headers=headers)
+            if res.status_code == 200:
+                items = res.json().get('items', [])
+                formatted_news = []
+                for item in items:
+                    # <b> 태그 제거 및 데이터 정제
+                    title = item['title'].replace("<b>", "").replace("</b>", "").replace("&quot;", "\"")
+                    formatted_news.append({
+                        "title": f"📢 {title}",
+                        "url": item['link']  # 기사 URL 제공됨
+                    })
+                return formatted_news
+        except Exception as e:
+            print(f"네이버 뉴스 로드 중 오류: {e}")
+        return []
 
 if __name__ == "__main__":
     pass

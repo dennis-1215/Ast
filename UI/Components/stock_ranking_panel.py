@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QFrame
 from PySide6.QtCore import Qt
 from UI.Styles.theme import *
-from UI.Components.stock_item import StockItemWidget
+from UI.Components.ranking_stock_item import RankingStockItem
 
 
 class StockRankingPanel(QWidget):
@@ -94,7 +94,7 @@ class StockRankingPanel(QWidget):
 
         # 새로운 데이터 추가
         for i, data in enumerate(stock_data, 1):
-            item_widget = StockItemWidget(
+            item_widget = RankingStockItem(
                 rank=i,
                 name=data['name'],
                 price=data['price'],

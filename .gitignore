@@ -3,3 +3,5 @@ AppKeys.py
 *.sqbpro
 .idea/
 __pycache__/
+/token_paper.txt
+/token_real.txt
